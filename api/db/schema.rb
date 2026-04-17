@@ -7,6 +7,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_16_060100) do
     t.string "department", null: false
     t.string "country_code", null: false
     t.string "currency_code", null: false
+    t.integer "annual_salary_cents", null: false
     t.date "hired_on", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
