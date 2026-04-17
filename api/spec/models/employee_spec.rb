@@ -72,4 +72,14 @@ RSpec.describe Employee, type: :model do
       expect(employee.errors[:currency_code]).to include("is the wrong length (should be 3 characters)")
     end
   end
+
+  describe "normalization" do
+    it "upper-cases country_code and currency_code, lower-cases work_email" do
+      employee = Employee.new(country_code: "us", currency_code: "usd", work_email: "  Bob@SALARY.local  ")
+
+      expect(employee.country_code).to eq("US")
+      expect(employee.currency_code).to eq("USD")
+      expect(employee.work_email).to eq("bob@salary.local")
+    end
+  end
 end
