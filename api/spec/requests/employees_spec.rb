@@ -84,3 +84,54 @@ RSpec.describe "GET /api/v1/employees/:id", type: :request do
     expect(response).to have_http_status(:not_found)
   end
 end
+
+RSpec.describe "POST /api/v1/employees", type: :request do
+  let(:valid_payload) do
+    {
+      employee: {
+        employee_code: "EMP-N001",
+        full_name: "New Hire",
+        work_email: "new@salary.local",
+        job_title: "Engineer",
+        department: "Engineering",
+        country_code: "US",
+        currency_code: "USD",
+        annual_salary_cents: 120_000_00,
+        hired_on: "2026-01-01"
+      }
+    }
+  end
+
+  it "creates an employee for an hr_manager" do
+    manager = create(:user, role: :hr_manager)
+
+    expect {
+      post "/api/v1/employees", params: valid_payload, headers: auth_headers_for(manager)
+    }.to change(Employee, :count).by(1)
+
+    expect(response).to have_http_status(:created)
+    expect(JSON.parse(response.body, symbolize_names: true)[:employee]).to include(employee_code: "EMP-N001")
+  end
+
+  it "rejects a viewer with 403" do
+    viewer = create(:user, role: :viewer)
+
+    post "/api/v1/employees", params: valid_payload, headers: auth_headers_for(viewer)
+
+    expect(response).to have_http_status(:forbidden)
+    expect(JSON.parse(response.body)).to include("error" => "You are not allowed to manage employees")
+  end
+
+  it "returns 422 with the model error messages on invalid payload" do
+    manager = create(:user, role: :hr_manager)
+
+    post "/api/v1/employees",
+         params: { employee: valid_payload[:employee].merge(work_email: "") },
+         headers: auth_headers_for(manager)
+
+    expect(response).to have_http_status(:unprocessable_entity)
+    body = JSON.parse(response.body)
+    expect(body["error"]).to eq("Employee could not be saved")
+    expect(body["details"]).to include(match(/Work email/i))
+  end
+end
