@@ -8,6 +8,7 @@ module Api
           return render_error("Invalid email or password", :unauthorized)
         end
 
+        user.update!(last_login_at: Time.current)
         token = JsonWebToken.encode(user_id: user.id)
 
         render json: { token: token, user: UserSerializer.new(user).as_json }
