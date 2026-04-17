@@ -3,7 +3,12 @@ module Api
     class EmployeesController < ApplicationController
       DEFAULT_PER_PAGE = 25
 
-      before_action :authorize_read_access!, only: %i[index]
+      before_action :authorize_read_access!, only: %i[index show]
+      before_action :set_employee, only: %i[show]
+
+      rescue_from ActiveRecord::RecordNotFound do
+        render_error("Employee not found", :not_found)
+      end
 
       def index
         page     = (params[:page].presence || 1).to_i
@@ -23,12 +28,24 @@ module Api
         }
       end
 
+      def show
+        render json: { employee: EmployeeSerializer.new(@employee).as_json }
+      end
+
       private
 
       def authorize_read_access!
         return if current_user.can_view_employees? || current_user.can_manage_employees?
 
         render_error("You are not allowed to view employees", :forbidden)
+      end
+
+      def set_employee
+        @employee = if params[:action] == "show" && ActiveModel::Type::Boolean.new.cast(params[:include_archived])
+          Employee.find(params[:id])
+        else
+          Employee.kept.find(params[:id])
+        end
       end
     end
   end
