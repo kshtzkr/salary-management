@@ -3,8 +3,9 @@ Rails.application.routes.draw do
 
   namespace :api do
     namespace :v1 do
-      post "auth/login", to: "auth#create"
-      get  "auth/me",    to: "auth#show"
+      post   "auth/login",  to: "auth#create"
+      post   "auth/logout", to: "auth#destroy"
+      get    "auth/me",     to: "auth#show"
     end
   end
 end

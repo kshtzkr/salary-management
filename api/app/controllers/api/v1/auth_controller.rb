@@ -23,6 +23,10 @@ module Api
       def show
         render json: { user: UserSerializer.new(current_user).as_json }
       end
+
+      def destroy
+        head :no_content
+      end
     end
   end
 end
