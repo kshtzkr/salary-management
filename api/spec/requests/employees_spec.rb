@@ -135,3 +135,39 @@ RSpec.describe "POST /api/v1/employees", type: :request do
     expect(body["details"]).to include(match(/Work email/i))
   end
 end
+
+RSpec.describe "PATCH /api/v1/employees/:id", type: :request do
+  it "updates fields for an hr_manager" do
+    manager  = create(:user, role: :hr_manager)
+    employee = create(:employee, job_title: "Engineer")
+
+    patch "/api/v1/employees/#{employee.id}",
+          params: { employee: { job_title: "Senior Engineer" } },
+          headers: auth_headers_for(manager)
+
+    expect(response).to have_http_status(:ok)
+    expect(employee.reload.job_title).to eq("Senior Engineer")
+  end
+
+  it "rejects a viewer with 403" do
+    viewer   = create(:user, role: :viewer)
+    employee = create(:employee)
+
+    patch "/api/v1/employees/#{employee.id}",
+          params: { employee: { job_title: "x" } },
+          headers: auth_headers_for(viewer)
+
+    expect(response).to have_http_status(:forbidden)
+  end
+
+  it "returns 422 when the update is invalid" do
+    manager  = create(:user, role: :hr_manager)
+    employee = create(:employee)
+
+    patch "/api/v1/employees/#{employee.id}",
+          params: { employee: { annual_salary_cents: -1 } },
+          headers: auth_headers_for(manager)
+
+    expect(response).to have_http_status(:unprocessable_entity)
+  end
+end
