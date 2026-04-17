@@ -1,4 +1,4 @@
-ActiveRecord::Schema[7.1].define(version: 2026_04_16_060100) do
+ActiveRecord::Schema[7.1].define(version: 2026_04_16_060200) do
   create_table "employees", force: :cascade do |t|
     t.string "employee_code", null: false
     t.string "full_name", null: false
@@ -11,7 +11,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_16_060100) do
     t.date "hired_on", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "employment_status", default: 0, null: false
     t.index ["employee_code"], name: "index_employees_on_employee_code", unique: true
+    t.index ["employment_status"], name: "index_employees_on_employment_status"
     t.index ["work_email"], name: "index_employees_on_work_email", unique: true
   end
 

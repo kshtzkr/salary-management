@@ -1,4 +1,13 @@
 class Employee < ApplicationRecord
+  EMPLOYMENT_STATUSES = {
+    active: 0,
+    probation: 1,
+    leave_of_absence: 2,
+    inactive: 3
+  }.freeze
+
+  enum employment_status: EMPLOYMENT_STATUSES
+
   normalizes :country_code, with: ->(value) { value.to_s.upcase }
   normalizes :currency_code, with: ->(value) { value.to_s.upcase }
   normalizes :work_email, with: ->(value) { value.to_s.strip.downcase }
