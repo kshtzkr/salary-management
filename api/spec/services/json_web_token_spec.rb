@@ -19,5 +19,12 @@ RSpec.describe JsonWebToken do
     it "raises DecodeError when the token is blank" do
       expect { JsonWebToken.decode("") }.to raise_error(JsonWebToken::DecodeError, /Missing token/)
     end
+
+    it "raises DecodeError when the signature is tampered" do
+      token = JsonWebToken.encode(user_id: 42)
+      tampered = token.split(".").tap { |parts| parts[2] = "deadbeef" }.join(".")
+
+      expect { JsonWebToken.decode(tampered) }.to raise_error(JsonWebToken::DecodeError)
+    end
   end
 end
