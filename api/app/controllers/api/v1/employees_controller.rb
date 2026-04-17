@@ -3,7 +3,8 @@ module Api
     class EmployeesController < ApplicationController
       DEFAULT_PER_PAGE = 25
 
-      before_action :authorize_read_access!, only: %i[index show]
+      before_action :authorize_read_access!,   only: %i[index show]
+      before_action :authorize_manage_access!, only: %i[create]
       before_action :set_employee, only: %i[show]
 
       rescue_from ActiveRecord::RecordNotFound do
@@ -32,6 +33,16 @@ module Api
         render json: { employee: EmployeeSerializer.new(@employee).as_json }
       end
 
+      def create
+        employee = Employee.new(employee_params)
+
+        if employee.save
+          render json: { employee: EmployeeSerializer.new(employee).as_json }, status: :created
+        else
+          render_error("Employee could not be saved", :unprocessable_entity, employee.errors.full_messages)
+        end
+      end
+
       private
 
       def authorize_read_access!
@@ -40,12 +51,33 @@ module Api
         render_error("You are not allowed to view employees", :forbidden)
       end
 
+      def authorize_manage_access!
+        return if current_user.can_manage_employees?
+
+        render_error("You are not allowed to manage employees", :forbidden)
+      end
+
       def set_employee
         @employee = if params[:action] == "show" && ActiveModel::Type::Boolean.new.cast(params[:include_archived])
           Employee.find(params[:id])
         else
           Employee.kept.find(params[:id])
         end
+      end
+
+      def employee_params
+        params.require(:employee).permit(
+          :employee_code,
+          :full_name,
+          :work_email,
+          :job_title,
+          :department,
+          :country_code,
+          :currency_code,
+          :annual_salary_cents,
+          :employment_status,
+          :hired_on
+        )
       end
     end
   end
