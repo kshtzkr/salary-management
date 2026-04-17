@@ -114,4 +114,24 @@ RSpec.describe Employee, type: :model do
       expect(Employee.archived).to contain_exactly(archived)
     end
   end
+
+  describe "soft-delete lifecycle" do
+    it "#soft_delete! stamps deleted_at and reports archived?" do
+      employee = Employee.create!(valid_attrs)
+
+      employee.soft_delete!
+
+      expect(employee.deleted_at).to be_present
+      expect(employee).to be_archived
+    end
+
+    it "#restore! clears deleted_at" do
+      employee = Employee.create!(valid_attrs.merge(deleted_at: 1.day.ago))
+
+      employee.restore!
+
+      expect(employee.deleted_at).to be_nil
+      expect(employee).not_to be_archived
+    end
+  end
 end
