@@ -46,3 +46,27 @@ RSpec.describe "POST /api/v1/auth/login", type: :request do
     expect(user.reload.last_login_at).to be_within(1.second).of(freeze_time)
   end
 end
+
+RSpec.describe "GET /api/v1/auth/me", type: :request do
+  it "returns 401 when no bearer token is sent" do
+    get "/api/v1/auth/me"
+
+    expect(response).to have_http_status(:unauthorized)
+    expect(JSON.parse(response.body)["error"]).to eq("Authentication required")
+  end
+
+  it "returns 401 when the bearer token is invalid" do
+    get "/api/v1/auth/me", headers: { "Authorization" => "Bearer junk.token.here" }
+
+    expect(response).to have_http_status(:unauthorized)
+  end
+
+  it "returns the current user when the bearer token is valid" do
+    user = create(:user, email: "me@salary.local", role: :hr_manager)
+
+    get "/api/v1/auth/me", headers: auth_headers_for(user)
+
+    expect(response).to have_http_status(:ok)
+    expect(JSON.parse(response.body).dig("user", "email")).to eq("me@salary.local")
+  end
+end
