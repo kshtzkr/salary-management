@@ -70,3 +70,14 @@ RSpec.describe "GET /api/v1/auth/me", type: :request do
     expect(JSON.parse(response.body).dig("user", "email")).to eq("me@salary.local")
   end
 end
+
+RSpec.describe "POST /api/v1/auth/logout", type: :request do
+  it "returns 204 No Content for an authenticated caller" do
+    user = create(:user)
+
+    post "/api/v1/auth/logout", headers: auth_headers_for(user)
+
+    expect(response).to have_http_status(:no_content)
+    expect(response.body).to be_empty
+  end
+end
