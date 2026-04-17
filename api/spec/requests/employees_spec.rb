@@ -63,3 +63,24 @@ RSpec.describe "GET /api/v1/employees", type: :request do
     end
   end
 end
+
+RSpec.describe "GET /api/v1/employees/:id", type: :request do
+  let(:viewer) { create(:user, role: :viewer) }
+
+  it "returns the serialized employee" do
+    employee = create(:employee, full_name: "Eve")
+
+    get "/api/v1/employees/#{employee.id}", headers: auth_headers_for(viewer)
+
+    expect(response).to have_http_status(:ok)
+    expect(JSON.parse(response.body, symbolize_names: true)[:employee]).to include(id: employee.id, full_name: "Eve")
+  end
+
+  it "404s for an archived employee unless include_archived is requested" do
+    employee = create(:employee, deleted_at: 1.day.ago)
+
+    get "/api/v1/employees/#{employee.id}", headers: auth_headers_for(viewer)
+
+    expect(response).to have_http_status(:not_found)
+  end
+end
