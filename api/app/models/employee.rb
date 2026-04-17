@@ -20,4 +20,16 @@ class Employee < ApplicationRecord
   validates :employee_code, :work_email, uniqueness: true
   validates :country_code, length: { is: 2 }
   validates :currency_code, length: { is: 3 }
+
+  def soft_delete!
+    update!(deleted_at: Time.current)
+  end
+
+  def restore!
+    update!(deleted_at: nil)
+  end
+
+  def archived?
+    deleted_at.present?
+  end
 end
