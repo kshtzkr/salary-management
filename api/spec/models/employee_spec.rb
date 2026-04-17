@@ -82,4 +82,20 @@ RSpec.describe Employee, type: :model do
       expect(employee.work_email).to eq("bob@salary.local")
     end
   end
+
+  describe "employment_status enum" do
+    it "exposes the four allowed statuses" do
+      expect(Employee::EMPLOYMENT_STATUSES.keys).to match_array(%i[active probation leave_of_absence inactive])
+    end
+
+    it "raises when assigned an unknown status" do
+      expect { Employee.new(employment_status: :sabbatical) }.to raise_error(ArgumentError)
+    end
+
+    it "defaults to :active" do
+      employee = Employee.new(valid_attrs)
+
+      expect(employee.employment_status).to eq("active")
+    end
+  end
 end
