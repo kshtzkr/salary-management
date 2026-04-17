@@ -104,6 +104,15 @@ RSpec.describe User, type: :model do
     end
   end
 
+  describe ".active" do
+    it "returns only users with active=true" do
+      live = User.create!(email: "live@salary.local", full_name: "Live", password: "Password123!", role: :viewer, active: true)
+      User.create!(email: "gone@salary.local", full_name: "Gone", password: "Password123!", role: :viewer, active: false)
+
+      expect(User.active).to contain_exactly(live)
+    end
+  end
+
   describe "normalization" do
     it "lower-cases and strips the email before saving" do
       user = User.new(email: "  Mixed@Case.LOCAL  ")
