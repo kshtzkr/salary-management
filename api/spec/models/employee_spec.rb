@@ -55,5 +55,21 @@ RSpec.describe Employee, type: :model do
 
       expect(duplicate.errors[:work_email]).to include("has already been taken")
     end
+
+    it "requires country_code to be exactly 2 characters" do
+      employee = Employee.new(valid_attrs.merge(country_code: "USA"))
+
+      employee.valid?
+
+      expect(employee.errors[:country_code]).to include("is the wrong length (should be 2 characters)")
+    end
+
+    it "requires currency_code to be exactly 3 characters" do
+      employee = Employee.new(valid_attrs.merge(currency_code: "DOLLAR"))
+
+      employee.valid?
+
+      expect(employee.errors[:currency_code]).to include("is the wrong length (should be 3 characters)")
+    end
   end
 end
