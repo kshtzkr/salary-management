@@ -68,6 +68,40 @@ RSpec.describe User, type: :model do
     it "raises when assigned an unknown role" do
       expect { User.new(role: :ceo) }.to raise_error(ArgumentError)
     end
+
+    describe "permission predicates" do
+      it "lets admin do everything" do
+        admin = User.new(role: :admin)
+        expect(admin.can_view_employees?).to be true
+        expect(admin.can_manage_employees?).to be true
+        expect(admin.can_view_insights?).to be true
+        expect(admin.can_manage_users?).to be true
+      end
+
+      it "lets hr_manager view + manage employees and view insights, but not manage users" do
+        hr = User.new(role: :hr_manager)
+        expect(hr.can_view_employees?).to be true
+        expect(hr.can_manage_employees?).to be true
+        expect(hr.can_view_insights?).to be true
+        expect(hr.can_manage_users?).to be false
+      end
+
+      it "lets analyst view insights only" do
+        analyst = User.new(role: :analyst)
+        expect(analyst.can_view_employees?).to be false
+        expect(analyst.can_manage_employees?).to be false
+        expect(analyst.can_view_insights?).to be true
+        expect(analyst.can_manage_users?).to be false
+      end
+
+      it "lets viewer read employees only" do
+        viewer = User.new(role: :viewer)
+        expect(viewer.can_view_employees?).to be true
+        expect(viewer.can_manage_employees?).to be false
+        expect(viewer.can_view_insights?).to be false
+        expect(viewer.can_manage_users?).to be false
+      end
+    end
   end
 
   describe "normalization" do
