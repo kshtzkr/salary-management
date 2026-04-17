@@ -98,4 +98,20 @@ RSpec.describe Employee, type: :model do
       expect(employee.employment_status).to eq("active")
     end
   end
+
+  describe "soft-delete scopes" do
+    it ".kept returns only employees with deleted_at NULL" do
+      kept = Employee.create!(valid_attrs)
+      Employee.create!(valid_attrs.merge(employee_code: "EMP-0002", work_email: "two@salary.local", deleted_at: 1.day.ago))
+
+      expect(Employee.kept).to contain_exactly(kept)
+    end
+
+    it ".archived returns only employees with deleted_at set" do
+      Employee.create!(valid_attrs)
+      archived = Employee.create!(valid_attrs.merge(employee_code: "EMP-0002", work_email: "two@salary.local", deleted_at: 1.day.ago))
+
+      expect(Employee.archived).to contain_exactly(archived)
+    end
+  end
 end
