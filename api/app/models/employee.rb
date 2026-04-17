@@ -8,6 +8,9 @@ class Employee < ApplicationRecord
 
   enum employment_status: EMPLOYMENT_STATUSES
 
+  scope :kept,     -> { where(deleted_at: nil) }
+  scope :archived, -> { where.not(deleted_at: nil) }
+
   normalizes :country_code, with: ->(value) { value.to_s.upcase }
   normalizes :currency_code, with: ->(value) { value.to_s.upcase }
   normalizes :work_email, with: ->(value) { value.to_s.strip.downcase }
