@@ -11,8 +11,8 @@ RSpec.describe User, type: :model do
     end
 
     it "is invalid when the email is already taken" do
-      User.create!(email: "duplicate@salary.local")
-      user = User.new(email: "duplicate@salary.local")
+      User.create!(email: "duplicate@salary.local", full_name: "Dup User")
+      user = User.new(email: "duplicate@salary.local", full_name: "Dup User")
 
       user.valid?
 
@@ -25,6 +25,14 @@ RSpec.describe User, type: :model do
       user.valid?
 
       expect(user.errors[:email]).to include("is invalid")
+    end
+
+    it "is invalid without a full name" do
+      user = User.new(full_name: nil)
+
+      user.valid?
+
+      expect(user.errors[:full_name]).to include("can't be blank")
     end
   end
 
