@@ -8,9 +8,9 @@ module Api
       def index
         page     = (params[:page].presence || 1).to_i
         per_page = (params[:per_page].presence || DEFAULT_PER_PAGE).to_i
-        scope    = Employee.kept.order(:full_name)
-        total    = scope.count
-        records  = scope.offset((page - 1) * per_page).limit(per_page)
+        results  = EmployeeSearch.new(scope: Employee.kept, params: params).call
+        total    = results.count
+        records  = results.offset((page - 1) * per_page).limit(per_page)
 
         render json: {
           employees: records.map { |employee| EmployeeSerializer.new(employee).as_json },
