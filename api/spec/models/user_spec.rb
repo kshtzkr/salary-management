@@ -34,6 +34,22 @@ RSpec.describe User, type: :model do
 
       expect(user.errors[:full_name]).to include("can't be blank")
     end
+
+    it "is invalid when the password is shorter than 10 characters" do
+      user = User.new(password: "short")
+
+      user.valid?
+
+      expect(user.errors[:password]).to include("is too short (minimum is 10 characters)")
+    end
+
+    it "allows password to be omitted on update (nil-tolerant)" do
+      user = User.create!(email: "keep@salary.local", full_name: "Keep", password: "Password123!")
+
+      user.full_name = "Keep Name"
+
+      expect(user).to be_valid
+    end
   end
 
   describe "normalization" do
