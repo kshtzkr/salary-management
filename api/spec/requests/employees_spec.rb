@@ -13,4 +13,13 @@ RSpec.describe "GET /api/v1/employees", type: :request do
     expect(body[:employees].map { |e| e[:id] }).to contain_exactly(alice.id)
     expect(body[:meta]).to include(page: 1, per_page: 25, total: 1, total_pages: 1)
   end
+
+  it "rejects analysts who can't view the employee directory" do
+    analyst = create(:user, role: :analyst)
+
+    get "/api/v1/employees", headers: auth_headers_for(analyst)
+
+    expect(response).to have_http_status(:forbidden)
+    expect(JSON.parse(response.body)).to include("error" => "You are not allowed to view employees")
+  end
 end
