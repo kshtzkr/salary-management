@@ -1,6 +1,8 @@
 module Api
   module V1
     class AuthController < ApplicationController
+      skip_before_action :authenticate_user!, only: :create
+
       def create
         user = User.active.find_by!(email: params.require(:email).to_s.downcase)
 
@@ -16,6 +18,10 @@ module Api
         render_error("Email and password are required", :unprocessable_entity)
       rescue ActiveRecord::RecordNotFound
         render_error("Invalid email or password", :unauthorized)
+      end
+
+      def show
+        render json: { user: UserSerializer.new(current_user).as_json }
       end
     end
   end
