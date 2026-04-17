@@ -11,8 +11,8 @@ RSpec.describe User, type: :model do
     end
 
     it "is invalid when the email is already taken" do
-      User.create!(email: "duplicate@salary.local", full_name: "Dup User", password: "Password123!")
-      user = User.new(email: "duplicate@salary.local", full_name: "Dup User", password: "Password123!")
+      User.create!(email: "duplicate@salary.local", full_name: "Dup User", password: "Password123!", role: :viewer)
+      user = User.new(email: "duplicate@salary.local", full_name: "Dup User", password: "Password123!", role: :viewer)
 
       user.valid?
 
@@ -44,11 +44,29 @@ RSpec.describe User, type: :model do
     end
 
     it "allows password to be omitted on update (nil-tolerant)" do
-      user = User.create!(email: "keep@salary.local", full_name: "Keep", password: "Password123!")
+      user = User.create!(email: "keep@salary.local", full_name: "Keep", password: "Password123!", role: :viewer)
 
       user.full_name = "Keep Name"
 
       expect(user).to be_valid
+    end
+
+    it "is invalid without a role" do
+      user = User.new(role: nil)
+
+      user.valid?
+
+      expect(user.errors[:role]).to include("can't be blank")
+    end
+  end
+
+  describe "roles" do
+    it "exposes the four allowed roles" do
+      expect(User::ROLES.keys).to match_array(%i[admin hr_manager analyst viewer])
+    end
+
+    it "raises when assigned an unknown role" do
+      expect { User.new(role: :ceo) }.to raise_error(ArgumentError)
     end
   end
 
@@ -62,7 +80,7 @@ RSpec.describe User, type: :model do
 
   describe "#authenticate" do
     let(:user) do
-      User.create!(email: "login@salary.local", full_name: "Login User", password: "Password123!")
+      User.create!(email: "login@salary.local", full_name: "Login User", password: "Password123!", role: :viewer)
     end
 
     it "stores the password as a bcrypt digest, not plaintext" do
