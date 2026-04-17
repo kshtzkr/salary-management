@@ -18,5 +18,13 @@ RSpec.describe User, type: :model do
 
       expect(user.errors[:email]).to include("has already been taken")
     end
+
+    it "is invalid when the email is malformed" do
+      user = User.new(email: "not-an-email")
+
+      user.valid?
+
+      expect(user.errors[:email]).to include("is invalid")
+    end
   end
 end
