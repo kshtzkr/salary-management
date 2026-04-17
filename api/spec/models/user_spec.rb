@@ -27,4 +27,12 @@ RSpec.describe User, type: :model do
       expect(user.errors[:email]).to include("is invalid")
     end
   end
+
+  describe "normalization" do
+    it "lower-cases and strips the email before saving" do
+      user = User.new(email: "  Mixed@Case.LOCAL  ")
+
+      expect(user.email).to eq("mixed@case.local")
+    end
+  end
 end
