@@ -11,4 +11,11 @@ RSpec.describe "POST /api/v1/auth/login", type: :request do
     expect(body["token"]).to be_present
     expect(body.dig("user", "email")).to eq(user.email)
   end
+
+  it "returns 401 with a generic message when the email is unknown" do
+    post "/api/v1/auth/login", params: { email: "ghost@salary.local", password: "Password123!" }
+
+    expect(response).to have_http_status(:unauthorized)
+    expect(JSON.parse(response.body)["error"]).to eq("Invalid email or password")
+  end
 end
