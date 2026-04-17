@@ -4,6 +4,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_16_060000) do
     t.string "full_name", null: false
     t.string "password_digest", null: false
     t.integer "role", default: 3, null: false
+    t.boolean "active", default: true, null: false
+    t.datetime "last_login_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["email"], name: "index_users_on_email", unique: true

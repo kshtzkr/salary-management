@@ -17,6 +17,8 @@ class User < ApplicationRecord
   validates :role, presence: true
   validates :password, length: { minimum: 10 }, allow_nil: true
 
+  scope :active, -> { where(active: true) }
+
   def role_in?(roles)
     roles.map(&:to_s).include?(role)
   end
