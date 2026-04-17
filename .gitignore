@@ -5,6 +5,9 @@
 /.vscode
 
 /api/.bundle
+/api/.rspec_status
+/api/db/*.sqlite3
+/api/db/*.sqlite3-*
 /api/log/*
 /api/tmp/*
 /api/storage/*
