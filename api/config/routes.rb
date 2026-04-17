@@ -6,6 +6,8 @@ Rails.application.routes.draw do
       post   "auth/login",  to: "auth#create"
       post   "auth/logout", to: "auth#destroy"
       get    "auth/me",     to: "auth#show"
+
+      resources :employees, only: %i[index]
     end
   end
 end
