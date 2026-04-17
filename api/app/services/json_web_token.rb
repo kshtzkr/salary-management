@@ -17,6 +17,6 @@ class JsonWebToken
   end
 
   def self.secret_key
-    Rails.application.secret_key_base
+    ENV.fetch("JWT_SECRET", Rails.application.secret_key_base)
   end
 end
