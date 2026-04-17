@@ -34,4 +34,15 @@ RSpec.describe "POST /api/v1/auth/login", type: :request do
     expect(response).to have_http_status(:unprocessable_entity)
     expect(JSON.parse(response.body)["error"]).to eq("Email and password are required")
   end
+
+  it "stamps last_login_at on a successful login" do
+    user = create(:user, email: "alice@salary.local", password: "Password123!", last_login_at: nil)
+
+    freeze_time = Time.current
+    travel_to(freeze_time) do
+      post "/api/v1/auth/login", params: { email: "alice@salary.local", password: "Password123!" }
+    end
+
+    expect(user.reload.last_login_at).to be_within(1.second).of(freeze_time)
+  end
 end
