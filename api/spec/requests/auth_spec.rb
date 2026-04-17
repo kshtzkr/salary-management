@@ -18,4 +18,20 @@ RSpec.describe "POST /api/v1/auth/login", type: :request do
     expect(response).to have_http_status(:unauthorized)
     expect(JSON.parse(response.body)["error"]).to eq("Invalid email or password")
   end
+
+  it "returns 401 with the same message when the password is wrong" do
+    create(:user, email: "alice@salary.local", password: "Password123!")
+
+    post "/api/v1/auth/login", params: { email: "alice@salary.local", password: "WrongPassword!" }
+
+    expect(response).to have_http_status(:unauthorized)
+    expect(JSON.parse(response.body)["error"]).to eq("Invalid email or password")
+  end
+
+  it "returns 422 when email or password is missing" do
+    post "/api/v1/auth/login", params: { email: "alice@salary.local" }
+
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(JSON.parse(response.body)["error"]).to eq("Email and password are required")
+  end
 end
