@@ -10,5 +10,20 @@ RSpec.describe SalaryInsights do
 
       expect(result).to include(country: "US", currency_code: "USD")
     end
+
+    it "reports minimum, maximum, and total payroll cents for the scoped country" do
+      create(:employee, country_code: "US", annual_salary_cents:  80_000_00, employee_code: "EMP-M001", work_email: "m1@salary.local")
+      create(:employee, country_code: "US", annual_salary_cents: 150_000_00, employee_code: "EMP-M002", work_email: "m2@salary.local")
+      create(:employee, country_code: "US", annual_salary_cents: 220_000_00, employee_code: "EMP-M003", work_email: "m3@salary.local")
+      create(:employee, country_code: "DE", annual_salary_cents: 999_999_00, employee_code: "EMP-M004", work_email: "m4@salary.local")
+
+      metrics = described_class.new(country_code: "US").overview[:metrics]
+
+      expect(metrics).to include(
+        minimum_salary_cents:  80_000_00,
+        maximum_salary_cents: 220_000_00,
+        total_payroll_cents:  450_000_00
+      )
+    end
   end
 end
