@@ -171,3 +171,26 @@ RSpec.describe "PATCH /api/v1/employees/:id", type: :request do
     expect(response).to have_http_status(:unprocessable_entity)
   end
 end
+
+RSpec.describe "DELETE /api/v1/employees/:id", type: :request do
+  it "soft-deletes the employee for an hr_manager" do
+    manager  = create(:user, role: :hr_manager)
+    employee = create(:employee)
+
+    delete "/api/v1/employees/#{employee.id}", headers: auth_headers_for(manager)
+
+    expect(response).to have_http_status(:no_content)
+    expect(employee.reload).to be_archived
+    expect(Employee.kept).to be_empty
+  end
+
+  it "rejects a viewer with 403" do
+    viewer   = create(:user, role: :viewer)
+    employee = create(:employee)
+
+    delete "/api/v1/employees/#{employee.id}", headers: auth_headers_for(viewer)
+
+    expect(response).to have_http_status(:forbidden)
+    expect(employee.reload).not_to be_archived
+  end
+end
