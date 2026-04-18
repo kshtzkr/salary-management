@@ -1,4 +1,17 @@
-ActiveRecord::Schema[7.1].define(version: 2026_04_16_060300) do
+ActiveRecord::Schema[7.1].define(version: 2026_04_16_060400) do
+  create_table "audit_logs", force: :cascade do |t|
+    t.integer "actor_id"
+    t.string "action", null: false
+    t.string "subject_type", null: false
+    t.bigint "subject_id", null: false
+    t.json "metadata", default: {}, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["action"], name: "index_audit_logs_on_action"
+    t.index ["actor_id"], name: "index_audit_logs_on_actor_id"
+    t.index ["subject_type", "subject_id"], name: "index_audit_logs_on_subject_type_and_subject_id"
+  end
+
   create_table "employees", force: :cascade do |t|
     t.string "employee_code", null: false
     t.string "full_name", null: false
@@ -30,4 +43,6 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_16_060300) do
     t.datetime "updated_at", null: false
     t.index ["email"], name: "index_users_on_email", unique: true
   end
+
+  add_foreign_key "audit_logs", "users", column: "actor_id"
 end
