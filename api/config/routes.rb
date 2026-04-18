@@ -13,6 +13,7 @@ Rails.application.routes.draw do
 
       namespace :insights do
         get :overview
+        get :job_titles
       end
     end
   end

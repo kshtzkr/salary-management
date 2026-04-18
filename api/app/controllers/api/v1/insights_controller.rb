@@ -8,6 +8,10 @@ module Api
         render json: SalaryInsights.new(country_code: params[:country]).overview
       end
 
+      def job_titles
+        render json: SalaryInsights.new(country_code: params[:country]).job_titles
+      end
+
       private
 
       def authorize_read_access!
