@@ -25,5 +25,19 @@ RSpec.describe SalaryInsights do
         total_payroll_cents:  450_000_00
       )
     end
+
+    it "reports rounded average and median salary cents" do
+      create(:employee, country_code: "US", annual_salary_cents: 100_000_00, employee_code: "EMP-A001", work_email: "a1@salary.local")
+      create(:employee, country_code: "US", annual_salary_cents: 150_000_00, employee_code: "EMP-A002", work_email: "a2@salary.local")
+      create(:employee, country_code: "US", annual_salary_cents: 200_000_00, employee_code: "EMP-A003", work_email: "a3@salary.local")
+      create(:employee, country_code: "US", annual_salary_cents: 300_000_00, employee_code: "EMP-A004", work_email: "a4@salary.local")
+
+      metrics = described_class.new(country_code: "US").overview[:metrics]
+
+      expect(metrics).to include(
+        average_salary_cents: 187_500_00,        # (100 + 150 + 200 + 300) / 4 * 100
+        median_salary_cents: 175_000_00          # (150 + 200) / 2 * 100
+      )
+    end
   end
 end
