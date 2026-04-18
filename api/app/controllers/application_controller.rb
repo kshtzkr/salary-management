@@ -13,6 +13,12 @@ class ApplicationController < ActionController::API
     render_error("Authentication required", :unauthorized)
   end
 
+  def authorize_roles!(*roles)
+    return if current_user&.role_in?(roles)
+
+    render_error("You are not allowed to perform this action", :forbidden)
+  end
+
   def render_error(message, status, details = nil)
     render json: { error: message, details: details }, status: status
   end

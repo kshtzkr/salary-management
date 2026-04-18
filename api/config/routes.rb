@@ -11,6 +11,8 @@ Rails.application.routes.draw do
         post :restore, on: :member
       end
 
+      resources :users, only: %i[index]
+
       namespace :insights do
         get :overview
         get :job_titles
