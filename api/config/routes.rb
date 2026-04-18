@@ -7,7 +7,7 @@ Rails.application.routes.draw do
       post   "auth/logout", to: "auth#destroy"
       get    "auth/me",     to: "auth#show"
 
-      resources :employees, only: %i[index show create update]
+      resources :employees, only: %i[index show create update destroy]
     end
   end
 end

@@ -4,8 +4,8 @@ module Api
       DEFAULT_PER_PAGE = 25
 
       before_action :authorize_read_access!,   only: %i[index show]
-      before_action :authorize_manage_access!, only: %i[create update]
-      before_action :set_employee, only: %i[show update]
+      before_action :authorize_manage_access!, only: %i[create update destroy]
+      before_action :set_employee, only: %i[show update destroy]
 
       rescue_from ActiveRecord::RecordNotFound do
         render_error("Employee not found", :not_found)
@@ -49,6 +49,11 @@ module Api
         else
           render_error("Employee could not be updated", :unprocessable_entity, @employee.errors.full_messages)
         end
+      end
+
+      def destroy
+        @employee.soft_delete!
+        head :no_content
       end
 
       private
