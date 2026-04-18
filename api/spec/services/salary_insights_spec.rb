@@ -52,4 +52,21 @@ RSpec.describe SalaryInsights do
       expect(metrics[:employee_count_by_status]).to eq(active: 2, probation: 1, leave_of_absence: 1)
     end
   end
+
+  describe "#overview top_job_titles" do
+    it "returns each job_title with count and rounded avg, sorted by count desc then title asc" do
+      create(:employee, country_code: "US", job_title: "Engineer", annual_salary_cents: 100_000_00, employee_code: "EMP-T001", work_email: "t1@salary.local")
+      create(:employee, country_code: "US", job_title: "Engineer", annual_salary_cents: 200_000_00, employee_code: "EMP-T002", work_email: "t2@salary.local")
+      create(:employee, country_code: "US", job_title: "Designer", annual_salary_cents: 120_000_00, employee_code: "EMP-T003", work_email: "t3@salary.local")
+      create(:employee, country_code: "US", job_title: "Product Manager", annual_salary_cents: 180_000_00, employee_code: "EMP-T004", work_email: "t4@salary.local")
+
+      top = described_class.new(country_code: "US").overview[:top_job_titles]
+
+      expect(top).to eq([
+        { job_title: "Engineer",        average_salary_cents: 150_000_00, employee_count: 2 },
+        { job_title: "Designer",        average_salary_cents: 120_000_00, employee_count: 1 },
+        { job_title: "Product Manager", average_salary_cents: 180_000_00, employee_count: 1 }
+      ])
+    end
+  end
 end
