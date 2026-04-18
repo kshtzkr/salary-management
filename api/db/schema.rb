@@ -1,4 +1,4 @@
-ActiveRecord::Schema[7.1].define(version: 2026_04_16_060400) do
+ActiveRecord::Schema[7.1].define(version: 2026_04_16_060500) do
   create_table "audit_logs", force: :cascade do |t|
     t.integer "actor_id"
     t.string "action", null: false
@@ -26,9 +26,11 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_16_060400) do
     t.datetime "updated_at", null: false
     t.integer "employment_status", default: 0, null: false
     t.datetime "deleted_at"
+    t.boolean "synthetic", default: false, null: false
     t.index ["deleted_at"], name: "index_employees_on_deleted_at"
     t.index ["employee_code"], name: "index_employees_on_employee_code", unique: true
     t.index ["employment_status"], name: "index_employees_on_employment_status"
+    t.index ["synthetic"], name: "index_employees_on_synthetic"
     t.index ["work_email"], name: "index_employees_on_work_email", unique: true
   end
 
