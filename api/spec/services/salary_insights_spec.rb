@@ -69,4 +69,17 @@ RSpec.describe SalaryInsights do
       ])
     end
   end
+
+  describe "#job_titles" do
+    it "returns the full breakdown (not truncated to 10)" do
+      12.times do |i|
+        create(:employee, country_code: "US", job_title: "Role #{format('%02d', i)}", employee_code: "EMP-JT#{i.to_s.rjust(3, '0')}", work_email: "jt#{i}@salary.local")
+      end
+
+      result = described_class.new(country_code: "US").job_titles
+
+      expect(result[:country]).to eq("US")
+      expect(result[:job_titles].length).to eq(12)
+    end
+  end
 end
