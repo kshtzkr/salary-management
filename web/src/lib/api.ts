@@ -8,6 +8,10 @@ export async function apiRequest<T>(path: string, init?: RequestInit): Promise<T
     cache: "no-store"
   });
 
+  if (response.status === 204) {
+    return undefined as T;
+  }
+
   let payload: any;
   try {
     payload = await response.json();
