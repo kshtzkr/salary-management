@@ -4,8 +4,8 @@ module Api
       DEFAULT_PER_PAGE = 25
 
       before_action :authorize_read_access!,   only: %i[index show]
-      before_action :authorize_manage_access!, only: %i[create update destroy]
-      before_action :set_employee, only: %i[show update destroy]
+      before_action :authorize_manage_access!, only: %i[create update destroy restore]
+      before_action :set_employee, only: %i[show update destroy restore]
 
       rescue_from ActiveRecord::RecordNotFound do
         render_error("Employee not found", :not_found)
@@ -56,6 +56,11 @@ module Api
         head :no_content
       end
 
+      def restore
+        @employee.restore!
+        render json: { employee: EmployeeSerializer.new(@employee).as_json }
+      end
+
       private
 
       def authorize_read_access!
@@ -71,7 +76,9 @@ module Api
       end
 
       def set_employee
-        @employee = if params[:action] == "show" && ActiveModel::Type::Boolean.new.cast(params[:include_archived])
+        @employee = if params[:action] == "restore"
+          Employee.archived.find(params[:id])
+        elsif params[:action] == "show" && ActiveModel::Type::Boolean.new.cast(params[:include_archived])
           Employee.find(params[:id])
         else
           Employee.kept.find(params[:id])
