@@ -18,7 +18,8 @@ class SalaryInsights
         total_payroll_cents: scope.sum(:annual_salary_cents),
         active_employee_count: scope.count,
         employee_count_by_status: scope.group(:employment_status).count.transform_keys { |status| Employee.employment_statuses.key(status).to_sym }
-      }
+      },
+      top_job_titles: job_title_breakdown.first(10)
     }
   end
 
@@ -37,5 +38,17 @@ class SalaryInsights
     return salaries[midpoint] if salaries.length.odd?
 
     ((salaries[midpoint - 1] + salaries[midpoint]) / 2.0).round
+  end
+
+  def job_title_breakdown
+    scope.group(:job_title)
+         .pluck(:job_title, Arel.sql("AVG(annual_salary_cents)"), Arel.sql("COUNT(*)"))
+         .map do |job_title, average_salary_cents, employee_count|
+      {
+        job_title: job_title,
+        average_salary_cents: average_salary_cents.to_f.round,
+        employee_count: employee_count
+      }
+    end.sort_by { |row| [-row[:employee_count], row[:job_title]] }
   end
 end
