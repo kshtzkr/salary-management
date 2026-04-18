@@ -53,3 +53,30 @@ RSpec.describe "POST /api/v1/users", type: :request do
     expect(JSON.parse(response.body)["details"]).to include(match(/Email/i))
   end
 end
+
+RSpec.describe "PATCH /api/v1/users/:id", type: :request do
+  let(:admin) { create(:user, role: :admin) }
+
+  it "updates role and leaves password untouched when blank" do
+    target = create(:user, role: :viewer, full_name: "Target", email: "target@salary.local")
+    original_digest = target.password_digest
+
+    patch "/api/v1/users/#{target.id}",
+          params: { user: { role: "analyst", password: "", password_confirmation: "" } },
+          headers: auth_headers_for(admin)
+
+    expect(response).to have_http_status(:ok)
+    expect(target.reload.role).to eq("analyst")
+    expect(target.password_digest).to eq(original_digest)
+  end
+
+  it "returns 422 when the update is invalid" do
+    target = create(:user, role: :viewer)
+
+    patch "/api/v1/users/#{target.id}",
+          params: { user: { email: "" } },
+          headers: auth_headers_for(admin)
+
+    expect(response).to have_http_status(:unprocessable_entity)
+  end
+end
