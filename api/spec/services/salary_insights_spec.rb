@@ -39,5 +39,17 @@ RSpec.describe SalaryInsights do
         median_salary_cents: 175_000_00          # (150 + 200) / 2 * 100
       )
     end
+
+    it "reports active_employee_count and employee_count_by_status with symbolised keys" do
+      create(:employee, country_code: "US", employment_status: :active,            employee_code: "EMP-ST01", work_email: "s1@salary.local")
+      create(:employee, country_code: "US", employment_status: :active,            employee_code: "EMP-ST02", work_email: "s2@salary.local")
+      create(:employee, country_code: "US", employment_status: :probation,         employee_code: "EMP-ST03", work_email: "s3@salary.local")
+      create(:employee, country_code: "US", employment_status: :leave_of_absence,  employee_code: "EMP-ST04", work_email: "s4@salary.local")
+
+      metrics = described_class.new(country_code: "US").overview[:metrics]
+
+      expect(metrics[:active_employee_count]).to eq(4)
+      expect(metrics[:employee_count_by_status]).to eq(active: 2, probation: 1, leave_of_absence: 1)
+    end
   end
 end
