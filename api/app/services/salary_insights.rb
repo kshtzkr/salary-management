@@ -17,7 +17,7 @@ class SalaryInsights
         median_salary_cents: median_salary_cents(salaries),
         total_payroll_cents: scope.sum(:annual_salary_cents),
         active_employee_count: scope.count,
-        employee_count_by_status: scope.group(:employment_status).count.transform_keys { |status| Employee.employment_statuses.key(status).to_sym }
+        employee_count_by_status: scope.group(:employment_status).count.transform_keys { |status| Employee.employment_statuses.key(status) }
       },
       top_job_titles: job_title_breakdown.first(10)
     }
