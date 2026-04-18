@@ -17,6 +17,18 @@ describe("apiRequest", () => {
     expect(payload).toEqual({ hello: "world" });
   });
 
+  it("returns undefined for 204 No Content (no JSON body)", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => ({
+      ok: true,
+      status: 204,
+      json: async () => { throw new Error("should not be called"); }
+    })));
+
+    const result = await apiRequest("/api/v1/employees/1");
+
+    expect(result).toBeUndefined();
+  });
+
   it("throws with the payload.error message on 4xx", async () => {
     vi.stubGlobal("fetch", vi.fn(async () => ({
       ok: false,
