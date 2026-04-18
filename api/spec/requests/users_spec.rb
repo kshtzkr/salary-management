@@ -80,3 +80,24 @@ RSpec.describe "PATCH /api/v1/users/:id", type: :request do
     expect(response).to have_http_status(:unprocessable_entity)
   end
 end
+
+RSpec.describe "DELETE /api/v1/users/:id", type: :request do
+  let(:admin) { create(:user, role: :admin) }
+
+  it "deactivates the target" do
+    target = create(:user, role: :viewer, active: true)
+
+    delete "/api/v1/users/#{target.id}", headers: auth_headers_for(admin)
+
+    expect(response).to have_http_status(:no_content)
+    expect(target.reload.active).to be(false)
+  end
+
+  it "rejects self-deactivation with 422" do
+    delete "/api/v1/users/#{admin.id}", headers: auth_headers_for(admin)
+
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(JSON.parse(response.body)).to include("error" => "You cannot deactivate your own account")
+    expect(admin.reload.active).to be(true)
+  end
+end
