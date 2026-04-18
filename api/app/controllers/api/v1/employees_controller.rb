@@ -37,6 +37,7 @@ module Api
         employee = Employee.new(employee_params)
 
         if employee.save
+          AuditLogger.log!(actor: current_user, action: "employee_created", subject: employee, changeset: employee.saved_changes.except("created_at", "updated_at"))
           render json: { employee: EmployeeSerializer.new(employee).as_json }, status: :created
         else
           render_error("Employee could not be saved", :unprocessable_entity, employee.errors.full_messages)
@@ -45,6 +46,7 @@ module Api
 
       def update
         if @employee.update(employee_params)
+          AuditLogger.log!(actor: current_user, action: "employee_updated", subject: @employee, changeset: @employee.saved_changes.except("updated_at"))
           render json: { employee: EmployeeSerializer.new(@employee).as_json }
         else
           render_error("Employee could not be updated", :unprocessable_entity, @employee.errors.full_messages)
@@ -53,11 +55,13 @@ module Api
 
       def destroy
         @employee.soft_delete!
+        AuditLogger.log!(actor: current_user, action: "employee_archived", subject: @employee)
         head :no_content
       end
 
       def restore
         @employee.restore!
+        AuditLogger.log!(actor: current_user, action: "employee_restored", subject: @employee)
         render json: { employee: EmployeeSerializer.new(@employee).as_json }
       end
 
