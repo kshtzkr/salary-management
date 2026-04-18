@@ -31,3 +31,25 @@ RSpec.describe "GET /api/v1/insights/overview", type: :request do
     expect(JSON.parse(response.body)).to include("error" => "country is required")
   end
 end
+
+RSpec.describe "GET /api/v1/insights/job_titles", type: :request do
+  it "returns the full job-title breakdown for an analyst" do
+    analyst = create(:user, role: :analyst)
+    create(:employee, country_code: "US", job_title: "Engineer", annual_salary_cents: 100_000_00)
+    create(:employee, country_code: "US", job_title: "Designer", annual_salary_cents: 120_000_00)
+
+    get "/api/v1/insights/job_titles", params: { country: "US" }, headers: auth_headers_for(analyst)
+
+    expect(response).to have_http_status(:ok)
+    body = JSON.parse(response.body, symbolize_names: true)
+    expect(body[:country]).to eq("US")
+    expect(body[:job_titles].map { |row| row[:job_title] }).to contain_exactly("Engineer", "Designer")
+  end
+
+  it "inherits the 403 and 422 guards from the controller" do
+    viewer = create(:user, role: :viewer)
+
+    get "/api/v1/insights/job_titles", params: { country: "US" }, headers: auth_headers_for(viewer)
+    expect(response).to have_http_status(:forbidden)
+  end
+end
