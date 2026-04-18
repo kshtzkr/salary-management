@@ -23,6 +23,14 @@ class SalaryInsights
     }
   end
 
+  def job_titles
+    {
+      country: country_code,
+      currency_code: scope.pick(:currency_code),
+      job_titles: job_title_breakdown
+    }
+  end
+
   private
 
   attr_reader :country_code, :scope
