@@ -20,3 +20,36 @@ RSpec.describe "GET /api/v1/users", type: :request do
     expect(response).to have_http_status(:forbidden)
   end
 end
+
+RSpec.describe "POST /api/v1/users", type: :request do
+  let(:admin) { create(:user, role: :admin) }
+  let(:valid_payload) do
+    {
+      user: {
+        full_name: "New Person",
+        email: "new@salary.local",
+        role: "viewer",
+        password: "Password123!",
+        password_confirmation: "Password123!"
+      }
+    }
+  end
+
+  it "creates a user" do
+    expect {
+      post "/api/v1/users", params: valid_payload, headers: auth_headers_for(admin)
+    }.to change(User, :count).by(1)
+
+    expect(response).to have_http_status(:created)
+    expect(JSON.parse(response.body, symbolize_names: true)[:user]).to include(email: "new@salary.local", role: "viewer")
+  end
+
+  it "returns 422 with model errors on invalid payload" do
+    post "/api/v1/users",
+         params: { user: valid_payload[:user].merge(email: "not-an-email") },
+         headers: auth_headers_for(admin)
+
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(JSON.parse(response.body)["details"]).to include(match(/Email/i))
+  end
+end
