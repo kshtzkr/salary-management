@@ -195,6 +195,40 @@ RSpec.describe "DELETE /api/v1/employees/:id", type: :request do
   end
 end
 
+RSpec.describe "Employee actions write an AuditLog", type: :request do
+  let(:manager) { create(:user, role: :hr_manager) }
+
+  it "logs employee_created on POST" do
+    payload = {
+      employee: {
+        employee_code: "EMP-AL01",
+        full_name: "Audit Hire",
+        work_email: "audit@salary.local",
+        job_title: "Engineer",
+        department: "Engineering",
+        country_code: "US",
+        currency_code: "USD",
+        annual_salary_cents: 120_000_00,
+        hired_on: "2026-01-01"
+      }
+    }
+
+    expect { post "/api/v1/employees", params: payload, headers: auth_headers_for(manager) }
+      .to change(AuditLog, :count).by(1)
+
+    expect(AuditLog.last).to have_attributes(actor: manager, action: "employee_created", subject_type: "Employee")
+  end
+
+  it "logs employee_archived on DELETE" do
+    employee = create(:employee)
+
+    expect { delete "/api/v1/employees/#{employee.id}", headers: auth_headers_for(manager) }
+      .to change(AuditLog, :count).by(1)
+
+    expect(AuditLog.last).to have_attributes(action: "employee_archived", subject_id: employee.id)
+  end
+end
+
 RSpec.describe "POST /api/v1/employees/:id/restore", type: :request do
   it "restores an archived employee for an hr_manager" do
     manager  = create(:user, role: :hr_manager)
