@@ -194,3 +194,34 @@ RSpec.describe "DELETE /api/v1/employees/:id", type: :request do
     expect(employee.reload).not_to be_archived
   end
 end
+
+RSpec.describe "POST /api/v1/employees/:id/restore", type: :request do
+  it "restores an archived employee for an hr_manager" do
+    manager  = create(:user, role: :hr_manager)
+    employee = create(:employee, deleted_at: 1.day.ago)
+
+    post "/api/v1/employees/#{employee.id}/restore", headers: auth_headers_for(manager)
+
+    expect(response).to have_http_status(:ok)
+    expect(employee.reload).not_to be_archived
+    expect(JSON.parse(response.body, symbolize_names: true)[:employee]).to include(id: employee.id, archived: false)
+  end
+
+  it "404s when the target is not archived" do
+    manager  = create(:user, role: :hr_manager)
+    employee = create(:employee)
+
+    post "/api/v1/employees/#{employee.id}/restore", headers: auth_headers_for(manager)
+
+    expect(response).to have_http_status(:not_found)
+  end
+
+  it "rejects viewers with 403" do
+    viewer   = create(:user, role: :viewer)
+    employee = create(:employee, deleted_at: 1.day.ago)
+
+    post "/api/v1/employees/#{employee.id}/restore", headers: auth_headers_for(viewer)
+
+    expect(response).to have_http_status(:forbidden)
+  end
+end
