@@ -8,10 +8,12 @@ export function LoginForm() {
   const router = useRouter();
   const [email, setEmail] = useState("admin@salary.local");
   const [password, setPassword] = useState("Password123!");
+  const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setError(null);
 
     startTransition(async () => {
       const response = await fetch("/api/auth/login", {
@@ -21,6 +23,8 @@ export function LoginForm() {
       });
 
       if (!response.ok) {
+        const payload = await response.json();
+        setError(payload.error || "Unable to sign in");
         return;
       }
 
@@ -41,6 +45,7 @@ export function LoginForm() {
               Salary command center
             </Typography>
           </Box>
+          {error ? <Alert severity="error">{error}</Alert> : null}
           <TextField label="Email" value={email} onChange={(event) => setEmail(event.target.value)} type="email" required />
           <TextField label="Password" value={password} onChange={(event) => setPassword(event.target.value)} type="password" required />
           <Button type="submit" variant="contained" size="large" disabled={isPending}>
