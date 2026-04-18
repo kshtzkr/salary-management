@@ -10,6 +10,10 @@ Rails.application.routes.draw do
       resources :employees, only: %i[index show create update destroy] do
         post :restore, on: :member
       end
+
+      namespace :insights do
+        get :overview
+      end
     end
   end
 end
