@@ -11,7 +11,7 @@ Rails.application.routes.draw do
         post :restore, on: :member
       end
 
-      resources :users, only: %i[index create update]
+      resources :users, only: %i[index create update destroy]
 
       namespace :insights do
         get :overview

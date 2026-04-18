@@ -2,7 +2,7 @@ module Api
   module V1
     class UsersController < ApplicationController
       before_action -> { authorize_roles!(:admin) }
-      before_action :set_user, only: %i[update]
+      before_action :set_user, only: %i[update destroy]
 
       def index
         render json: { users: User.order(:full_name).map { |user| UserSerializer.new(user).as_json } }
@@ -24,6 +24,13 @@ module Api
         else
           render_error("User could not be updated", :unprocessable_entity, @user.errors.full_messages)
         end
+      end
+
+      def destroy
+        return render_error("You cannot deactivate your own account", :unprocessable_entity) if @user == current_user
+
+        @user.update!(active: false)
+        head :no_content
       end
 
       private
