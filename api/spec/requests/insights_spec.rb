@@ -12,4 +12,22 @@ RSpec.describe "GET /api/v1/insights/overview", type: :request do
     expect(body).to include(country: "US")
     expect(body[:metrics]).to include(:average_salary_cents, :median_salary_cents, :total_payroll_cents)
   end
+
+  it "rejects a viewer with 403" do
+    viewer = create(:user, role: :viewer)
+
+    get "/api/v1/insights/overview", params: { country: "US" }, headers: auth_headers_for(viewer)
+
+    expect(response).to have_http_status(:forbidden)
+    expect(JSON.parse(response.body)).to include("error" => "You are not allowed to view salary insights")
+  end
+
+  it "returns 422 when country is missing" do
+    analyst = create(:user, role: :analyst)
+
+    get "/api/v1/insights/overview", headers: auth_headers_for(analyst)
+
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(JSON.parse(response.body)).to include("error" => "country is required")
+  end
 end
