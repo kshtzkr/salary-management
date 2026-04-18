@@ -28,4 +28,20 @@ describe("LoginForm", () => {
 
     await waitFor(() => expect(push).toHaveBeenCalledWith("/dashboard"));
   });
+
+  it("renders the server error when login fails", async () => {
+    vi.stubGlobal("fetch", vi.fn(() =>
+      Promise.resolve({
+        ok: false,
+        json: () => Promise.resolve({ error: "Invalid email or password" })
+      })
+    ));
+
+    render(<LoginForm />);
+
+    fireEvent.click(screen.getByRole("button", { name: /sign in/i }));
+
+    expect(await screen.findByText("Invalid email or password")).toBeInTheDocument();
+    expect(push).not.toHaveBeenCalled();
+  });
 });
